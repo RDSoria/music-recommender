@@ -42,7 +42,7 @@ Advanced extractor using OpenL3 deep learning embeddings:
 
 ```bash
 python extractor_openl3.py \
-  --music-dir "/path/to/folder" \
+  --music-dir "/path/to/folder/media" \
   --out-dir "./features_json" \
   --seconds 0 --hop-size 0.1 --embedding-size 6144
 ```
@@ -76,9 +76,40 @@ python test_recommend.py --features-dir "./features_json" --song "Take on Me" --
 
 ## Workflow
 
+### Basic Workflow
 1. **Extract Features**: Use either extractor to process your music library
 2. **Get Recommendations**: Use test_recommend.py to find similar songs
 3. **Compare Results**: Try both extractors to see which works better for your music collection
+
+### Improved Workflow (Clustered)
+For better recommendations using unsupervised clustering:
+
+1. **Extract Features**: Use either extractor to process your music library
+2. **Build Clusters**: Create music clusters based on embedding similarity
+   ```bash
+   python build_clusters.py --features-dir "./features_json" --out "clusters.json"
+   ```
+3. **Get Clustered Recommendations**: Use cluster-aware recommendation for improved results
+   ```bash
+   python test_recommend_clustered.py --features-dir "./features_json" --clusters "clusters.json" --song "Take on Me" --topk 3
+   ```
+
+#### Clustering Benefits
+- **Genre/Style Awareness**: Groups songs by musical similarity automatically
+- **Better Recommendations**: Prioritizes songs from the same cluster (similar style/genre)
+- **Fallback Strategy**: Uses backfill from other clusters when needed
+- **Automatic K Selection**: Uses silhouette analysis to determine optimal number of clusters
+
+#### build_clusters.py Parameters
+- `--features-dir`: Directory containing JSON feature files
+- `--out`: Output file for cluster data (default: clusters.json)
+- `--k`: Number of clusters (0 = auto-select via silhouette analysis)
+
+#### test_recommend_clustered.py Parameters
+- `--features-dir`: Directory containing JSON feature files
+- `--clusters`: Path to clusters.json file
+- `--song`: Seed song name (case-insensitive, partial matching supported)
+- `--topk`: Number of recommendations to return
 
 ## Supported Audio Formats
 - MP3, FLAC, WAV, M4A, OGG, AAC
